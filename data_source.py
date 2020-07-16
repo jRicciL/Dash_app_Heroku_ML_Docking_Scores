@@ -182,6 +182,7 @@ def line_plot_metrics(split, selector, metric, protein_name):
     # Libraries annotations
     fig.add_annotation(xref='paper', yref='paper', x=0.01, y=0.98,
             xanchor='left', yanchor='top', showarrow=False,
+            align="left",
             text=f'<b>Total mols:</b> {n_actives}/{n_mols}; Ra = {round(n_actives/n_mols, 2)}' +
             f'<br><b>Test set:</b> {int(n_actives/4)}/{int(n_mols/4)}; Ra = {round(n_actives/n_mols, 2)}'
     )

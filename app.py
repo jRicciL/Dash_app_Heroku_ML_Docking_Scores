@@ -131,7 +131,7 @@ app.layout = dbc.Container(
             style=CONTENT_STYLE
         ),
         html.Footer([
-            html.A('Ricci-López',
+            html.A('@Ricci-López',
             href='https://github.com/jRicciL',
             target='_blank')
             ], 
