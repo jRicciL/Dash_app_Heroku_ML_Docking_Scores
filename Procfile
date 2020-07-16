@@ -1,1 +1,1 @@
-web: gunicorn app:server
+web: gunicorn ml-dk-scores-app:server
