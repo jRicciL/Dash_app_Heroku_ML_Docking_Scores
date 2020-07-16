@@ -4,13 +4,29 @@ import numpy as np
 import pickle
 
 # Read the pickle file
-data_file = './FXA_ML_results_conformational_selection.obj'
-with open(data_file, 'rb') as f:
-    ALL_RESULTS = pickle.load(f)
+data_file_fxa = './FXA_ML_results_conformational_selection.obj'
+with open(data_file_fxa, 'rb') as f:
+    ALL_RESULTS_FXa = pickle.load(f)
+
+data_file_cdk2 = './CDK2_ML_results_conformational_selection.obj'
+with open(data_file_cdk2, 'rb') as f:
+    ALL_RESULTS_CDK2 = pickle.load(f)
+
+# Mol libraries info
+cdk2_mols = dict(num_mols=6233, num_actives=300)
+fxa_mols = dict(num_mols=3466, num_actives=415)
+
+
 
 # Parse the data from the dictionary
-X_dksc = ALL_RESULTS['X_dksc']
-X = ALL_RESULTS['X_ml']
+def get_data(protein_name):
+    if protein_name == 'FXa':
+        X_dksc = ALL_RESULTS_FXa['X_dksc']
+        X = ALL_RESULTS_FXa['X_ml']
+    elif protein_name == 'CDK2':
+        X_dksc = ALL_RESULTS_CDK2['X_dksc']
+        X = ALL_RESULTS_CDK2['X_ml']
+    return X_dksc, X 
 
 # plotly configurations
 mode_bar_buttons = ["toImage", "autoScale2d",
@@ -41,7 +57,7 @@ split_names = {'rand': 'Random',
 selector_names = {'rand' : 'Random',
                   'LR'   : 'RFE (Log. Reg.)',
                   'RF'   : 'RFE (Rand. Forest)',
-                  'XGB'  : 'RFE (Grad. Boost)'}
+                  'XGB'  : 'RFE (Grad. Boosting)'}
 
 clf_names_dict = {'LogReg'  : 'Log. Regression',
                   'rbfSVC'  : 'RBF SVM',
@@ -55,19 +71,21 @@ metric_names = {'roc_auc'   : 'ROC-AUC',
                 'bedroc_10' : 'BEDROC (a=10)',
                 'bedroc_2'  : 'BEDROC (a=2)',
                 'bedroc_0.5': 'BEDROC (a=0.5)',
-                'ef_0.001'  : 'EF (chi=0.1%)',
-                'ef_0.005'  : 'EF (chi=0.5%)',
-                'ef_0.02'   : 'EF (chi=2.0%)',
                 'ef_0.2'    : 'EF (chi=20.0%)',
+                'ef_0.02'   : 'EF (chi=2.0%)',
+                'ef_0.005'  : 'EF (chi=0.5%)',
+                'ef_0.001'  : 'EF (chi=0.1%)',
                }
 
 # LINE PLOT FUNCTION
-def line_plot_metrics(split, selector, metric):
+def line_plot_metrics(split, selector, metric, protein_name):
     query = f"split == '{split}' & selector == '{selector}' & metric == '{metric}'"
+
+    X_dksc, X = get_data(protein_name)
 
     # Ref score
     best_ref = X_dksc.query(query).max()['best_dksc']
-    median_ref = X_dksc.query(query).median()['mean_dksc']
+    median_ref = X_dksc.query(query).median()['median_dksc']
 
     # Results
     X_subset = X.query(query)
@@ -142,32 +160,32 @@ def line_plot_metrics(split, selector, metric):
     # Best raw score
     fig.add_shape(dict(type='line', x0=0, x1=n_confs, y0=best_ref, y1=best_ref),
                  line=dict(color="#B7AF9E", width=1.5, dash = 'dot'))
-    fig.add_annotation(x=n_confs - 10, y=best_ref,
+    fig.add_annotation(x=n_confs - n_confs*0.06, y=best_ref,
                        showarrow=False,
-                       font=dict(size=10),
+                       font=dict(size=12),
                        text='max Dksc: <b>{:.2f}</b>'.format(best_ref), 
                        bgcolor="#CEC9BD")
     # Meadian raw score
     fig.add_shape(dict(type='line', x0=0, x1=n_confs, y0=median_ref, y1=median_ref),
                  line=dict(color="#689AA8", width=1.5, dash = 'dot'))
-    fig.add_annotation(x=n_confs - 10, y=median_ref,
+    fig.add_annotation(x=n_confs - n_confs*0.06, y=median_ref,
                        showarrow=False,
-                       font=dict(size=10),
+                       font=dict(size=12),
                        text='med Dksc: <b>{:.2f}</b>'.format(median_ref), 
                        bgcolor="#B5D3DC")
     # AXES
-    fig.update_xaxes(ticks='outside', showline=True, linewidth=2,
+    fig.update_xaxes(ticks='outside', showline=True, linewidth=2.7, title_font=dict(size=22),
                        linecolor='#43494F', mirror = True)
     # Y axis changes
     fig.update_yaxes(y_axis_params)
-    fig.update_yaxes(ticks='outside', showline=True, 
-                     linewidth=2, linecolor='black', mirror = True)
+    fig.update_yaxes(ticks='outside', showline=True, title_font=dict(size=22),
+                     linewidth=2.5, linecolor='black', mirror = True)
     fig.update_layout(
         height=600,
         template='plotly_white',
                       hoverlabel=dict(
                          bgcolor = 'white',
-                         font_size=12.5
+                         font_size=14
                       ),
                       xaxis = dict(
                          title='Number of protein conformations used'
@@ -176,6 +194,7 @@ def line_plot_metrics(split, selector, metric):
                          title=f'Metric Score:<br><b>{metric_names[metric]}</b>'
                       ),
                       legend=dict(
+                         font=dict(size=15),
                          orientation="h",
                          yanchor="bottom",
                          y=0.02,
@@ -184,6 +203,6 @@ def line_plot_metrics(split, selector, metric):
                          bgcolor="#F5F3EF"
                         ),
                         dragmode='pan',
-                        margin=dict(l=30, r=30, t=10, b=30),
+                        margin=dict(l=30, r=30, t=5, b=30),
                         modebar=dict(orientation='v', activecolor='#1d89ff'))
     return fig
