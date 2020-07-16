@@ -10,6 +10,7 @@ from data_source import *
 
 
 app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
+app.title = 'JRL: Thesis'
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
@@ -117,6 +118,7 @@ line_plot = [
 #***********
 app.layout = dbc.Container(
     [
+        html.Hr(),
         html.H1("CDK2 & FXa Results"),
         html.Hr(),
         html.Br(),
@@ -128,7 +130,11 @@ app.layout = dbc.Container(
             align="center",
             style=CONTENT_STYLE
         ),
-        html.Footer('Joel Ricci', 
+        html.Footer([
+            html.A('Ricci-López',
+            href='https://github.com/jRicciL',
+            target='_blank')
+            ], 
         className='page-footer font-small blue',
         style=FOOTER_STYLE)
     ],
