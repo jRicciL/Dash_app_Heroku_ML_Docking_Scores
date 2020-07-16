@@ -31,7 +31,7 @@ CONTENT_STYLE = {
 FOOTER_STYLE = {
     "position": "absolute",
     "bottom": "0",
-    "height": "100px"
+    "height": "30px"
 }
 
 
