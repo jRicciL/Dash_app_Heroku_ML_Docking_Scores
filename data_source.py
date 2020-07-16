@@ -13,9 +13,10 @@ with open(data_file_cdk2, 'rb') as f:
     ALL_RESULTS_CDK2 = pickle.load(f)
 
 # Mol libraries info
-cdk2_mols = dict(num_mols=6233, num_actives=300)
-fxa_mols = dict(num_mols=3466, num_actives=415)
-
+fxa_mols = dict(num_mols=6233, num_actives=300)
+cdk2_mols = dict(num_mols=3466, num_actives=415)
+mos_info = {'CDK2': cdk2_mols,
+            'FXa': fxa_mols}
 
 
 # Parse the data from the dictionary
@@ -82,6 +83,11 @@ def line_plot_metrics(split, selector, metric, protein_name):
     query = f"split == '{split}' & selector == '{selector}' & metric == '{metric}'"
 
     X_dksc, X = get_data(protein_name)
+
+    # Mols info
+    libs = mos_info[protein_name]
+    n_mols = libs['num_mols']
+    n_actives = libs['num_actives']
 
     # Ref score
     best_ref = X_dksc.query(query).max()['best_dksc']
@@ -173,6 +179,12 @@ def line_plot_metrics(split, selector, metric, protein_name):
                        font=dict(size=12),
                        text='med Dksc: <b>{:.2f}</b>'.format(median_ref), 
                        bgcolor="#B5D3DC")
+    # Libraries annotations
+    fig.add_annotation(xref='paper', yref='paper', x=0.01, y=0.98,
+            xanchor='left', yanchor='top', showarrow=False,
+            text=f'<b>Total mols:</b> {n_actives}/{n_mols}; Ra = {round(n_actives/n_mols, 2)}' +
+            f'<br><b>Test set:</b> {int(n_actives/4)}/{int(n_mols/4)}; Ra = {round(n_actives/n_mols, 2)}'
+    )
     # AXES
     fig.update_xaxes(ticks='outside', showline=True, linewidth=2.7, title_font=dict(size=22),
                        linecolor='#43494F', mirror = True)
