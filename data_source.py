@@ -144,7 +144,7 @@ def line_plot_metrics(split, selector, metric):
                  line=dict(color="#B7AF9E", width=1.5, dash = 'dot'))
     fig.add_annotation(x=n_confs - 10, y=best_ref,
                        showarrow=False,
-                       font=dict(size=9),
+                       font=dict(size=10),
                        text='max Dksc: <b>{:.2f}</b>'.format(best_ref), 
                        bgcolor="#CEC9BD")
     # Meadian raw score
@@ -152,7 +152,7 @@ def line_plot_metrics(split, selector, metric):
                  line=dict(color="#689AA8", width=1.5, dash = 'dot'))
     fig.add_annotation(x=n_confs - 10, y=median_ref,
                        showarrow=False,
-                       font=dict(size=9),
+                       font=dict(size=10),
                        text='med Dksc: <b>{:.2f}</b>'.format(median_ref), 
                        bgcolor="#B5D3DC")
     # AXES
@@ -162,10 +162,12 @@ def line_plot_metrics(split, selector, metric):
     fig.update_yaxes(y_axis_params)
     fig.update_yaxes(ticks='outside', showline=True, 
                      linewidth=2, linecolor='black', mirror = True)
-    fig.update_layout(template='plotly_white',
+    fig.update_layout(
+        height=600,
+        template='plotly_white',
                       hoverlabel=dict(
                          bgcolor = 'white',
-                         font_size=11.5
+                         font_size=12.5
                       ),
                       xaxis = dict(
                          title='Number of protein conformations used'
@@ -182,6 +184,6 @@ def line_plot_metrics(split, selector, metric):
                          bgcolor="#F5F3EF"
                         ),
                         dragmode='pan',
-                        margin=dict(l=30, r=30, t=30, b=30),
+                        margin=dict(l=30, r=30, t=10, b=30),
                         modebar=dict(orientation='v', activecolor='#1d89ff'))
     return fig
