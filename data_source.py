@@ -18,7 +18,6 @@ cdk2_mols = dict(num_mols=3466, num_actives=415)
 mos_info = {'CDK2': cdk2_mols,
             'FXa': fxa_mols}
 
-
 # Parse the data from the dictionary
 def get_data(protein_name):
     if protein_name == 'FXa':
