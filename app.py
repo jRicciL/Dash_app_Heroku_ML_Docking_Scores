@@ -31,9 +31,11 @@ CONTENT_STYLE = {
 }
 
 FOOTER_STYLE = {
-    "position": "absolute",
+    "position": "fixed",
     "bottom": "0",
-    "height": "30px"
+    "height": "30px",
+    "width": "100%",
+    "background-color": "white"
 }
 
 
@@ -100,9 +102,26 @@ controls = dbc.Card(
                     style = {"color": "#222222"}
                 ),
             ]
+        ),
+        html.Hr(style={'background-color': '#666666'}),
+        dbc.FormGroup(
+            [
+                dbc.Label("Violin plot:", className='font-weight-bold'),
+                dbc.Checklist(
+                    id="show-benchmarks",
+                    options=[
+                        {'label': 'Show benchmark sets', 'value': True}
+                    ],
+                    value=[],
+                    switch=True,
+                    labelCheckedStyle={"color": "#FFE1A6"},
+                    style = {"color": "#fff"}
+                ),
+            ]
         )
     ],
     body=True,
+    className="d-flex align-self-stretch",
     style=SIDEBAR_STYLE
 )
 
@@ -128,26 +147,34 @@ n_confs_slider = html.Div([
         min=1,
         max=max_value,
         step=1,
-        value=10,
+        value=50,
         marks=slider_range
     )
 ])
 
 scatter_plot = [
-    html.H5('Dim Reduction', className='text-center')
+    html.H5('Dim Reduction', className='text-center'),
+     dcc.Graph(
+        id='scatter-plot',
+        config=plotly_conf
+    )
 ]
 
 violin_plot = [
-    html.H5('Violin plot', className='text-center')
+    html.H5(id='violin-title', className='text-center'),
+    dcc.Graph(
+        id='violin-plot',
+        config=plotly_conf
+    )
 ]
 
 # Plot Sections
 plot_section = [
     dbc.Row([
-        dbc.Col(line_plot, md=12),
-        dbc.Col(n_confs_slider, md=12),
-        dbc.Col(scatter_plot, md=5),
+        dbc.Col(line_plot, md=12, className='mb-2'),
+        dbc.Col(n_confs_slider, md=12, className='mb-5'),
         dbc.Col(violin_plot, md=7),
+        dbc.Col(scatter_plot, md=5),
     ])
 ]
 
@@ -162,7 +189,7 @@ app.layout = dbc.Container(
         html.Br(),
         dbc.Row(
             [
-                dbc.Col(controls, md=3),
+                dbc.Col(controls, md=3, className='mb-5'),
                 dbc.Col(plot_section, md=9),
             ],
             align="center",
@@ -183,7 +210,10 @@ app.layout = dbc.Container(
 
 # Title updater
 @app.callback(
-    Output(component_id='plot-title', component_property='children'),
+    [
+        Output(component_id='plot-title', component_property='children'),
+        Output(component_id='violin-title', component_property='children')
+    ],
     [
         Input("split-value", "value"),
         Input("selector-value", "value"),
@@ -196,7 +226,7 @@ def render_title(split, selector, metric, protein_name):
     selector_name = selector_names[selector]
     metric_name = metric_names[metric]
     #title = f"<span class='font-weight-light'>Metric</span> {metric_name} - {split_name} Splitting - {selector_name} Selection"
-    title = html.P(children=[
+    line_title = html.P(children=[
         html.Span(f"{protein_name}: ", className='font-weight-bold h3'),
         html.Span('Metric ', className='font-weight-light font-italic'),
         html.Span(metric_name),
@@ -207,22 +237,36 @@ def render_title(split, selector, metric, protein_name):
         html.Span(selector_name),
         html.Span(' Selection', className='font-weight-light font-italic'),
     ])
-    return title
+
+    violin_title = html.P(children=[
+        html.Span(f"Violin plot: ", className='font-weight-bold'),
+        html.Span(f'{metric_name} score'),
+        html.Span(' using ', className='font-weight-light'),
+        html.Span('Docking Raw Scores', className='font-weight-light font-italic'),
+    ])
+    return line_title, violin_title
 
 
-# Line Plot Render
+# Plot Renders
 @app.callback(
-    Output(component_id='line-plot', component_property='figure'),
+    [
+        Output(component_id='line-plot', component_property='figure'),
+        Output(component_id='violin-plot', component_property='figure'),
+        Output(component_id='scatter-plot', component_property='figure'),
+    ],
     [
         Input("split-value", "value"),
         Input("selector-value", "value"),
         Input("metric-value", "value"),
-        Input("protein-value", "value")
+        Input("protein-value", "value"),
+        Input("show-benchmarks", "value"),
     ]
 )
-def render_plot(split, selector, metric, protein_name):
-    fig = line_plot_metrics(split, selector, metric, protein_name)
-    return fig
+def render_plot(split, selector, metric, protein_name, show_benchmarks):
+    line_plot = line_plot_metrics(split, selector, metric, protein_name)
+    violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks)
+    scatter_plot = mds_plot(protein_name)
+    return line_plot, violin_plot, scatter_plot
 
 if __name__ == '__main__':
     app.run_server(debug=True)

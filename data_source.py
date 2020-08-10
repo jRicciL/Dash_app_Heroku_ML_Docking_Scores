@@ -91,11 +91,95 @@ def get_y_axis_params(metric, plot_type = 'line'):
     return y_axis_params
 
 
+# SCATTER PLOT
+def mds_plot(protein_name):
+    # Table of protein metadata
+    X_mtd = get_data(protein_name, 'df_PROT_METADATA')
+    X_mtd.set_index('PDB-id', inplace=True)
+
+    df_DIM_REDUCT = get_data(protein_name, 'df_DIM_REDUCT')
+
+    dr_method = 'mds'
+    prot_section = 'sec'
+    color_by='Conformation'
+
+    # Define colors
+
+    # Get the dimensions
+    colname = f'{dr_method}_{prot_section}_'
+    Z = df_DIM_REDUCT[[colname + 'x', colname + 'y']]
+    Z.columns = ['x', 'y']
+    print(Z.x)
+
+    # Add the columns to the metadata
+    X_mtd['x'] = Z.x
+    X_mtd['y'] = Z.y
+
+    
+
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x = X_mtd.x,
+            y = X_mtd.y,
+            mode='markers',
+            marker=dict(
+                color='red'
+            )
+        )
+    )
+
+    # AXES
+    fig.update_xaxes(ticks='outside', showline=True, linewidth=2.7, title_font=dict(size=22),
+                       linecolor='#43494F', mirror = True)
+    fig.update_yaxes(ticks='outside', showline=True, title_font=dict(size=22),
+                     linewidth=2.5, linecolor='black', mirror = True)
+    fig.update_layout(
+        height=450,
+        template='plotly_white',
+        hoverlabel=dict(
+            bgcolor = 'white',
+            font_size=14
+        ),
+        xaxis = dict(
+            title='Molecular Data Sets'
+        ),
+        yaxis = dict(
+            title=f'Second Dimension',
+            zeroline=True, zerolinecolor='#999999'
+        ),
+        legend=dict(
+            font=dict(size=15),
+            orientation="h",
+            yanchor="bottom",
+            y=0.02,
+            xanchor="center",
+            x=0.5,
+            bgcolor="#F5F3EF"
+        ),
+        dragmode='pan',
+        margin=dict(l=30, r=30, t=5, b=30),
+        modebar=dict(orientation='v', activecolor='#1d89ff')
+    )
+
+    return fig
+
+     
+
+
 # VIOLIN PLOT FUNCTION
-def violin_plot_metrics(metric, protein_name):
+def violin_plot_metrics(metric, protein_name, show_benchmarks):
+    if 'bedroc' in metric or 'ef' in metric:
+        metric_filter = metric.replace('_', '-')
+    else:
+        metric_filter = metric
     
     df_DKSC_METRICS = get_data(protein_name, 'df_DKSC_METRICS')
-    W = df_DKSC_METRICS.filter(regex=metric)
+    W = df_DKSC_METRICS.filter(regex=metric_filter)
+   
+    if len(show_benchmarks) == 0:
+        W = W.filter(regex='scff|merged')
     
     y_axis_params = get_y_axis_params(metric, 'violin')
 
@@ -113,7 +197,9 @@ def violin_plot_metrics(metric, protein_name):
                     size = 5,
                     opacity=0.5
                 ),
-                opacity=0.7
+                opacity=0.7,
+                hoverinfo='text',
+                hovertext=W.index
             )
         )
 
@@ -135,7 +221,8 @@ def violin_plot_metrics(metric, protein_name):
             title='Molecular Data Sets'
         ),
         yaxis = dict(
-            title=f'Metric Score:<br><b>{metric_names[metric]}</b>'
+            title=f'Metric Score:<br><b>{metric_names[metric]}</b>',
+            zeroline=True, zerolinecolor='#999999'
         ),
         legend=dict(
             font=dict(size=15),
