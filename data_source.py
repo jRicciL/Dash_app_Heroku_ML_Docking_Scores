@@ -4,13 +4,17 @@ import numpy as np
 import pickle
 
 # Read the pickle file
-data_file_fxa = './FXA_ML_results_conformational_selection.obj'
+data_file_fxa = './FXA_dash_app_results.obj'
 with open(data_file_fxa, 'rb') as f:
-    ALL_RESULTS_FXa = pickle.load(f)
+    FXA_DATA = pickle.load(f)
 
-data_file_cdk2 = './CDK2_ML_results_conformational_selection.obj'
+data_file_cdk2 = './CDK2_dash_app_results.obj'
 with open(data_file_cdk2, 'rb') as f:
-    ALL_RESULTS_CDK2 = pickle.load(f)
+    CDK2_DATA = pickle.load(f)
+
+# Assing values
+ALL_RESULTS_FXa = FXA_DATA['dict_ML_RESULTS']
+ALL_RESULTS_CDK2 = CDK2_DATA['dict_ML_RESULTS']
 
 # Mol libraries info
 fxa_mols = dict(num_mols=6233, num_actives=300)
@@ -162,14 +166,6 @@ def line_plot_metrics(split, selector, metric, protein_name):
     fig = go.Figure(data=traces)   
 
     # Add ref DkSc best score
-    # Best raw score
-    fig.add_shape(dict(type='line', x0=0, x1=n_confs, y0=best_ref, y1=best_ref),
-                 line=dict(color="#B7AF9E", width=1.5, dash = 'dot'))
-    fig.add_annotation(x=n_confs - n_confs*0.06, y=best_ref,
-                       showarrow=False,
-                       font=dict(size=12),
-                       text='max Dksc: <b>{:.2f}</b>'.format(best_ref), 
-                       bgcolor="#CEC9BD")
     # Meadian raw score
     fig.add_shape(dict(type='line', x0=0, x1=n_confs, y0=median_ref, y1=median_ref),
                  line=dict(color="#689AA8", width=1.5, dash = 'dot'))
@@ -178,6 +174,15 @@ def line_plot_metrics(split, selector, metric, protein_name):
                        font=dict(size=12),
                        text='med Dksc: <b>{:.2f}</b>'.format(median_ref), 
                        bgcolor="#B5D3DC")
+
+    # Best raw score
+    fig.add_shape(dict(type='line', x0=0, x1=n_confs, y0=best_ref, y1=best_ref),
+                 line=dict(color="#B7AF9E", width=1.5, dash = 'dot'))
+    fig.add_annotation(x=n_confs - n_confs*0.06, y=best_ref,
+                       showarrow=False,
+                       font=dict(size=12),
+                       text='max Dksc: <b>{:.2f}</b>'.format(best_ref), 
+                       bgcolor="#CEC9BD")
     # Libraries annotations
     fig.add_annotation(xref='paper', yref='paper', x=0.01, y=0.98,
             xanchor='left', yanchor='top', showarrow=False,
