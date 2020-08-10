@@ -23,14 +23,12 @@ mos_info = {'CDK2': cdk2_mols,
             'FXa': fxa_mols}
 
 # Parse the data from the dictionary
-def get_data(protein_name):
+def get_data(protein_name, key):
     if protein_name == 'FXa':
-        X_dksc = ALL_RESULTS_FXa['X_dksc']
-        X = ALL_RESULTS_FXa['X_ml']
+        data = FXA_DATA[key]
     elif protein_name == 'CDK2':
-        X_dksc = ALL_RESULTS_CDK2['X_dksc']
-        X = ALL_RESULTS_CDK2['X_ml']
-    return X_dksc, X 
+        data = CDK2_DATA[key]
+    return data 
 
 # plotly configurations
 mode_bar_buttons = ["toImage", "autoScale2d",
@@ -81,11 +79,19 @@ metric_names = {'roc_auc'   : 'ROC-AUC',
                 'ef_0.001'  : 'EF (chi=0.1%)',
                }
 
+# VIOLIN PLOT FUNCTION
+def violin_plot(metric, protein_name):
+    pass
+
 # LINE PLOT FUNCTION
 def line_plot_metrics(split, selector, metric, protein_name):
     query = f"split == '{split}' & selector == '{selector}' & metric == '{metric}'"
 
-    X_dksc, X = get_data(protein_name)
+    #X_dksc, X = get_data(protein_name)
+
+    dict_ML_RESULTS = get_data(protein_name, 'dict_ML_RESULTS')
+    X_dksc = dict_ML_RESULTS['X_dksc']
+    X = dict_ML_RESULTS['X_ml']
 
     # Mols info
     libs = mos_info[protein_name]
@@ -198,7 +204,7 @@ def line_plot_metrics(split, selector, metric, protein_name):
     fig.update_yaxes(ticks='outside', showline=True, title_font=dict(size=22),
                      linewidth=2.5, linecolor='black', mirror = True)
     fig.update_layout(
-        height=600,
+        height=500,
         template='plotly_white',
                       hoverlabel=dict(
                          bgcolor = 'white',
