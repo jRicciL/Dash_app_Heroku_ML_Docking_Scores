@@ -3,6 +3,7 @@ import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
@@ -236,6 +237,19 @@ app.layout = dbc.Container(
             align="center",
             style=CONTENT_STYLE
         ),
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.H4('Table of Protein Conformations',
+                        className='text-center', style={'color': 'black'}),
+                    md=12, className='mt-5'
+                ),
+                dbc.Col(id='div-mtd-table',
+                    md=12, className='mb-5 p-3'),
+            ],
+            align="center",
+            style=CONTENT_STYLE
+        ),
         html.Footer([
             html.A('@Ricci-López',
             href='https://github.com/jRicciL',
@@ -248,6 +262,10 @@ app.layout = dbc.Container(
 )
 
 # Callbacks
+
+
+
+
 # Slider callback
 @app.callback(
     [
@@ -268,7 +286,7 @@ def set_slider(protein_name, max, marks):
     elif protein_name == 'FXa':
         max_value = 136 
 
-    marks = { i: str(i) for i in range(max_value) if i%10 == 0}
+    marks = { i: str(i) for i in range(1, max_value) if i%10 == 0 or i == 1}
 
     return max_value, marks
 
@@ -331,6 +349,7 @@ def render_title(split, selector, metric, protein_name, dr_method, protein_secti
         Output(component_id='line-plot', component_property='figure'),
         Output(component_id='violin-plot', component_property='figure'),
         Output(component_id='scatter-plot', component_property='figure'),
+        Output(component_id='div-mtd-table', component_property='children')
     ],
     [
         Input("split-value", "value"),
@@ -355,7 +374,10 @@ def render_plot(split, selector, metric,
     violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks, preselected_confs)
 
     scatter_plot = mds_plot(protein_name, dr_method, prot_section, point_size_by, preselected_confs)
-    return line_plot, violin_plot, scatter_plot
+    
+    mtd_table = render_mtd_table(protein_name, preselected_confs)
+    
+    return line_plot, violin_plot, scatter_plot, mtd_table
 
 if __name__ == '__main__':
     app.run_server(debug=True)

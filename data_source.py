@@ -2,6 +2,8 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 import pickle
+import dash_table
+import dash_html_components as html
 
 # Read the pickle file
 data_file_fxa = './FXA_dash_app_results.obj'
@@ -133,6 +135,53 @@ def get_y_axis_params(metric, plot_type = 'line'):
     else:
         y_axis_params = dict(range=[0.0, 1], tick0=0.00, dtick=0.1)
     return y_axis_params
+
+
+# DT Table
+def render_mtd_table(protein_name, preselected_confs):
+    df_PROT_METADATA = get_data(protein_name, 'df_PROT_METADATA')
+
+    #df_PROT_METADATA.loc[:,'PDB-id'] = df_PROT_METADATA['PDB-id'].apply(lambda x: html.A(href=f'https://www.rcsb.org/structure/{x}', children=x, target='_blank'))
+    df_PROT_METADATA.loc[:,'Resolution'] = df_PROT_METADATA['Resolution'].apply(lambda x: round(x, 2))
+    df_PROT_METADATA.loc[:,'Coverage'] = df_PROT_METADATA['Coverage'].apply(lambda x: round(x, 2))
+    df_PROT_METADATA.loc[:,'Date'] = df_PROT_METADATA['Date'].dt.strftime('%m/%d/%Y')
+    df_PROT_METADATA = df_PROT_METADATA.drop(['Pocket Volume (Sec)'], axis=1)
+
+    df_PROT_METADATA.colums = [
+        'PDB id', 'Pub. Date', 'Resolution', 'Coverage',
+        'Ligand', 'Ligand MW', 'Pocket Volume', 'Conformation'
+    ]
+
+    # Subset the dataframe
+    if preselected_confs is not None:
+        X = df_PROT_METADATA.iloc[preselected_confs]
+    elif preselected_confs is  None:
+        X = df_PROT_METADATA.iloc[:15]
+
+    mtd_table = dash_table.DataTable(
+        id='dt-table',
+        data= X.to_dict('records'),
+        columns=[{"name": i, "id": i} for i in X.columns],
+        fixed_rows={'headers': True},
+        sort_action="native",
+        style_as_list_view=True,
+        style_table={'height': '500px', 'overflowY': 'auto'},
+        style_cell={
+            'textAlign': 'center',
+            'font-size': '0.8rem',
+            'padding': '2px 8px 2px 8px',
+            'color': '#333'
+            },
+        style_header={
+                'color': 'white',
+                'backgroundColor': '#444',
+                'fontWeight': 'bold',
+                'font-size': '1rem',
+                'text-align': 'center'
+            },
+    )
+
+    return mtd_table
 
 
 # SCATTER PLOT
