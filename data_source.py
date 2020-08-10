@@ -79,9 +79,45 @@ metric_names = {'roc_auc'   : 'ROC-AUC',
                 'ef_0.001'  : 'EF (chi=0.1%)',
                }
 
+def get_y_axis_params(metric):
+    if (metric == 'roc_auc'):
+        y_axis_params = dict(range=[0.4, 1], tick0=0.00, dtick=0.05)
+    elif (metric == 'nef_auc'):
+        y_axis_params = dict(range=[0.2, 1], tick0=0.00, dtick=0.05)
+    elif 'ef_' in metric:
+        y_axis_params = dict()
+    else:
+        y_axis_params = dict(range=[0.0, 1], tick0=0.00, dtick=0.1)
+    return y_axis_params
+
+
 # VIOLIN PLOT FUNCTION
 def violin_plot(metric, protein_name):
-    pass
+    
+    df_DKSC_METRICS = get_data(protein_name, 'df_DKSC_METRICS')
+    W = df_DKSC_METRICS.filter(regex=metric)
+    
+    y_axis_params = get_y_axis_params(metric)
+
+    fig = go.Figure()
+
+    for column in W:
+        fig.add_trace(
+            go.Violin(
+                y = W[column],
+                name = column.split()[0].upper(),
+                jitter = 1, points = 'all', side = 'positive',
+                box_visible = True,
+                # selectedpoints = selected_points,
+                marker = dict(
+                    size = 5
+                )
+            )
+        )
+    
+    return fig
+
+
 
 # LINE PLOT FUNCTION
 def line_plot_metrics(split, selector, metric, protein_name):
@@ -112,15 +148,7 @@ def line_plot_metrics(split, selector, metric, protein_name):
     # Número de conformaciones
     n_confs = X_mean.shape[0]
 
-    if (metric == 'roc_auc'):
-        y_axis_params = dict(range=[0.4, 1], tick0=0.00, dtick=0.05)
-    elif (metric == 'nef_auc'):
-        y_axis_params = dict(range=[0.2, 1], tick0=0.00, dtick=0.05)
-    elif 'ef_' in metric:
-        y_axis_params = dict()
-    else:
-        y_axis_params = dict(range=[0.0, 1], tick0=0.00, dtick=0.1)
-
+    y_axis_params = get_y_axis_params(metric)
 
     traces = []
     for col in X_mean.columns:
