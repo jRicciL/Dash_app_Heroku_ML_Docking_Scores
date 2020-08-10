@@ -96,6 +96,31 @@ point_size_by = {
     #'None': 'None'
 }
 
+conf_presel_selectors = {
+    'LR'   : 'LogReg',
+    'RF'   : 'RandomForest',
+    'XGB'  : 'XGB_tree'
+}
+
+conf_presel_split = {
+    'rand': 'random',
+    'scff': 'scaffold'
+}
+
+def get_preselected_confs(split, selector, n_confs, protein_name):
+    df_SELECTED_CONFS = get_data(protein_name, 'df_SELECTED_CONFS')
+
+    # Get the selector-split set
+    selected_confs = None
+    if selector != 'rand':
+        selected_confs = df_SELECTED_CONFS[
+            f'RFE_{conf_presel_selectors[selector]}_{conf_presel_split[split]}'
+            ]
+
+        selected_confs = selected_confs[:n_confs]
+        
+    
+    return selected_confs
 
 
 def get_y_axis_params(metric, plot_type = 'line'):
@@ -299,7 +324,7 @@ def violin_plot_metrics(metric, protein_name, show_benchmarks):
 
 
 # LINE PLOT FUNCTION
-def line_plot_metrics(split, selector, metric, protein_name):
+def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
     query = f"split == '{split}' & selector == '{selector}' & metric == '{metric}'"
 
     #X_dksc, X = get_data(protein_name)
@@ -391,6 +416,13 @@ def line_plot_metrics(split, selector, metric, protein_name):
     # Best raw score
     fig.add_shape(dict(type='line', x0=0, x1=n_confs, y0=best_ref, y1=best_ref),
                  line=dict(color="#B7AF9E", width=1.5, dash = 'dot'))
+
+    # Slider trace
+    fig.add_shape(dict(type='line', x0=n_confs_sel, x1=n_confs_sel,
+                    yref='paper',
+                    y0=0, y1=1),
+                 line=dict(color="blue", width=1.5, dash = 'dot'))
+
     fig.add_annotation(x=n_confs - n_confs*0.06, y=best_ref,
                        showarrow=False,
                        font=dict(size=12),

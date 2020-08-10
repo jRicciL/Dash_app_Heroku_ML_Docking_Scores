@@ -315,11 +315,16 @@ def render_title(split, selector, metric, protein_name, dr_method, protein_secti
         Input("dr-method-value", "value"),
         Input("prot-section-value", "value"),
         Input("point-size-by", "value"),
+        Input("n-confs-slider", "value"),
     ]
 )
 def render_plot(split, selector, metric, 
-    protein_name, show_benchmarks, dr_method, prot_section, point_size_by):
-    line_plot = line_plot_metrics(split, selector, metric, protein_name)
+    protein_name, show_benchmarks, dr_method, 
+    prot_section, point_size_by, n_confs):
+
+    preselected_confs = get_preselected_confs(split, selector, n_confs, protein_name)
+
+    line_plot = line_plot_metrics(split, selector, metric, protein_name, n_confs)
 
     violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks)
 
