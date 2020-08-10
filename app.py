@@ -106,6 +106,10 @@ controls = dbc.Card(
     style=SIDEBAR_STYLE
 )
 
+
+# *****
+# PLOTS
+# *****
 line_plot = [
         html.H5(id='plot-title', className='text-center'),
         dcc.Graph(
@@ -114,6 +118,38 @@ line_plot = [
                 config=plotly_conf
             )
     ]
+
+# SLIDER
+max_value = 402
+slider_range = { i: str(i) for i in range(max_value) if i%10 == 0}
+n_confs_slider = html.Div([
+    dcc.Slider(
+        id='n-confs-slider',
+        min=1,
+        max=max_value,
+        step=1,
+        value=10,
+        marks=slider_range
+    )
+])
+
+scatter_plot = [
+    html.H5('Dim Reduction', className='text-center')
+]
+
+violin_plot = [
+    html.H5('Violin plot', className='text-center')
+]
+
+# Plot Sections
+plot_section = [
+    dbc.Row([
+        dbc.Col(line_plot, md=12),
+        dbc.Col(n_confs_slider, md=12),
+        dbc.Col(scatter_plot, md=5),
+        dbc.Col(violin_plot, md=7),
+    ])
+]
 
 #***********
 # APP LAYOUT
@@ -127,7 +163,7 @@ app.layout = dbc.Container(
         dbc.Row(
             [
                 dbc.Col(controls, md=3),
-                dbc.Col(line_plot, md=9),
+                dbc.Col(plot_section, md=9),
             ],
             align="center",
             style=CONTENT_STYLE
