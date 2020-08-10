@@ -79,12 +79,25 @@ metric_names = {'roc_auc'   : 'ROC-AUC',
                 'ef_0.001'  : 'EF (chi=0.1%)',
                }
 
+dr_methods_names = {
+    'mds': 'cMDS',
+    'tsne': 't-SNE'
+}
+
+prot_section_dr = {
+    'sec': 'Secondary Structure (Ca)',
+    'pkt': 'Pocket Residues (Ca)',
+    'vol_pkt': 'Pocket Shape (POVME) (cMDS)'
+}
+
+
+
 def get_y_axis_params(metric, plot_type = 'line'):
     if (metric == 'roc_auc' and plot_type == 'line'):
         y_axis_params = dict(range=[0.4, 1], tick0=0.00, dtick=0.05)
     elif (metric == 'nef_auc' and plot_type == 'line'):
         y_axis_params = dict(range=[0.2, 1], tick0=0.00, dtick=0.05)
-    elif 'ef_' in metric:
+    elif 'ef_0' in metric:
         y_axis_params = dict()
     else:
         y_axis_params = dict(range=[0.0, 1], tick0=0.00, dtick=0.1)
@@ -92,43 +105,72 @@ def get_y_axis_params(metric, plot_type = 'line'):
 
 
 # SCATTER PLOT
-def mds_plot(protein_name):
+scatter_colors = ['#2a7885', '#5a8b59', '#f64a3b', 'grey', '#fecc6a', '#69d7c4']
+
+def mds_plot(protein_name, dr_method, prot_section):
     # Table of protein metadata
-    X_mtd = get_data(protein_name, 'df_PROT_METADATA')
-    X_mtd.set_index('PDB-id', inplace=True)
+    df_PROT_METADATA = get_data(protein_name, 'df_PROT_METADATA')
+    
 
     df_DIM_REDUCT = get_data(protein_name, 'df_DIM_REDUCT')
 
-    dr_method = 'mds'
-    prot_section = 'sec'
-    color_by='Conformation'
-
-    # Define colors
+    # Temporal: if pocket volume
+    if prot_section == 'vol_pkt':
+        dr_method = 'mds'
 
     # Get the dimensions
     colname = f'{dr_method}_{prot_section}_'
     Z = df_DIM_REDUCT[[colname + 'x', colname + 'y']]
     Z.columns = ['x', 'y']
-    print(Z.x)
 
     # Add the columns to the metadata
-    X_mtd['x'] = Z.x
-    X_mtd['y'] = Z.y
+    X_mtd = pd.concat([df_PROT_METADATA.set_index('PDB-id'),
+                Z], axis=1)
+    X_mtd.reset_index(inplace=True)
+    X_mtd.LigMass = pd.to_numeric(X_mtd.LigMass)
 
-    
+    color_by='Conformation'
+    labels_col = X_mtd[color_by]
+
+    # Define colors
+    if labels_col.dtype == 'object':
+        labels = labels_col.unique()
+        
+        # Select the number of colors
+        n_labels = len(labels)
+        color_mapper = {i:j for i, j in 
+                        zip(labels, scatter_colors[:n_labels])}
+        
+        X_mtd['color_col'] = labels_col.map(color_mapper)
+
 
     fig = go.Figure()
 
-    fig.add_trace(
-        go.Scatter(
-            x = X_mtd.x,
-            y = X_mtd.y,
-            mode='markers',
-            marker=dict(
-                color='red'
+    for label in labels:
+        subset = X_mtd.query(f'{color_by} == "{label}"')
+
+        # formatted_text = [f'' 
+        #     for idx, lig, lig_mass, vol in
+        #     zip(subset[['']])]
+        fig.add_trace(
+            go.Scatter(
+                x = subset.x,
+                y = subset.y,
+                name=label,
+                showlegend=False,
+                mode='markers',
+                marker=dict(
+                    color=subset['color_col'],
+                    size=subset['Pocket Volume (Pkt)'],
+                    sizemode='diameter',
+                    sizeref=70,
+                    line_width=0
+                ),
+                opacity=0.8,
+                hoverinfo='text',
+                # hovertext=formatted_text
             )
         )
-    )
 
     # AXES
     fig.update_xaxes(ticks='outside', showline=True, linewidth=2.7, title_font=dict(size=22),
@@ -143,17 +185,18 @@ def mds_plot(protein_name):
             font_size=14
         ),
         xaxis = dict(
-            title='Molecular Data Sets'
+            title='First Dimension',
+            zeroline=True, zerolinecolor='#BBBBBB', zerolinewidth=2
         ),
         yaxis = dict(
             title=f'Second Dimension',
-            zeroline=True, zerolinecolor='#999999'
+            zeroline=True, zerolinecolor='#BBBBBB', zerolinewidth=2
         ),
         legend=dict(
             font=dict(size=15),
             orientation="h",
             yanchor="bottom",
-            y=0.02,
+            y=-0.4,
             xanchor="center",
             x=0.5,
             bgcolor="#F5F3EF"
@@ -170,7 +213,7 @@ def mds_plot(protein_name):
 
 # VIOLIN PLOT FUNCTION
 def violin_plot_metrics(metric, protein_name, show_benchmarks):
-    if 'bedroc' in metric or 'ef' in metric:
+    if 'bedroc' in metric or 'ef_0' in metric:
         metric_filter = metric.replace('_', '-')
     else:
         metric_filter = metric
@@ -195,11 +238,11 @@ def violin_plot_metrics(metric, protein_name, show_benchmarks):
                 # selectedpoints = selected_points,
                 marker = dict(
                     size = 5,
-                    opacity=0.5
+                    opacity=0.4
                 ),
-                opacity=0.7,
+                opacity=0.6,
                 hoverinfo='text',
-                hovertext=W.index
+                hovertext=[f'{i}: {str(j)}' for i, j in zip(W.index, W[column])]
             )
         )
 

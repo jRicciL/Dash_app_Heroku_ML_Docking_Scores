@@ -118,7 +118,33 @@ controls = dbc.Card(
                     style = {"color": "#fff"}
                 ),
             ]
-        )
+        ),
+        html.Hr(style={'background-color': '#666666'}),
+        dbc.FormGroup(
+            [
+                dbc.Label("Dimensionality Reduction (DR) method:", className='font-weight-bold'),
+                dbc.RadioItems(
+                    id="dr-method-value",
+                    options=[
+                        {'label': value, 'value': key} for key, value in dr_methods_names.items()
+                    ],
+                    value='mds',
+                    labelCheckedStyle={"color": "#F5D5AB"},
+                    inline=True
+                ),
+                html.Br(),
+                dbc.Label("Protein atoms/region used for DR:", className='font-weight-bold'),
+                dbc.RadioItems(
+                    id="prot-section-value",
+                    options=[
+                        {'label': value, 'value': key} for key, value in prot_section_dr.items()
+                    ],
+                    value='sec',
+                    labelCheckedStyle={"color": "#F5D5AB"}
+                ),
+            ],
+        ),
+        
     ],
     body=True,
     className="d-flex align-self-stretch",
@@ -150,7 +176,7 @@ n_confs_slider = html.Div([
         value=50,
         marks=slider_range
     )
-])
+], className='ml-5 pl-2 pr-1')
 
 scatter_plot = [
     html.H5('Dim Reduction', className='text-center'),
@@ -175,7 +201,9 @@ plot_section = [
         dbc.Col(n_confs_slider, md=12, className='mb-5'),
         dbc.Col(violin_plot, md=7),
         dbc.Col(scatter_plot, md=5),
-    ])
+       ],
+    className='mb-5'
+    )
 ]
 
 #***********
@@ -260,12 +288,15 @@ def render_title(split, selector, metric, protein_name):
         Input("metric-value", "value"),
         Input("protein-value", "value"),
         Input("show-benchmarks", "value"),
+        Input("dr-method-value", "value"),
+        Input("prot-section-value", "value"),
     ]
 )
-def render_plot(split, selector, metric, protein_name, show_benchmarks):
+def render_plot(split, selector, metric, 
+    protein_name, show_benchmarks, dr_method, prot_section):
     line_plot = line_plot_metrics(split, selector, metric, protein_name)
     violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks)
-    scatter_plot = mds_plot(protein_name)
+    scatter_plot = mds_plot(protein_name, dr_method, prot_section)
     return line_plot, violin_plot, scatter_plot
 
 if __name__ == '__main__':
