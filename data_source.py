@@ -79,10 +79,10 @@ metric_names = {'roc_auc'   : 'ROC-AUC',
                 'ef_0.001'  : 'EF (chi=0.1%)',
                }
 
-def get_y_axis_params(metric):
-    if (metric == 'roc_auc'):
+def get_y_axis_params(metric, plot_type = 'line'):
+    if (metric == 'roc_auc' and plot_type == 'line'):
         y_axis_params = dict(range=[0.4, 1], tick0=0.00, dtick=0.05)
-    elif (metric == 'nef_auc'):
+    elif (metric == 'nef_auc' and plot_type == 'line'):
         y_axis_params = dict(range=[0.2, 1], tick0=0.00, dtick=0.05)
     elif 'ef_' in metric:
         y_axis_params = dict()
@@ -92,12 +92,12 @@ def get_y_axis_params(metric):
 
 
 # VIOLIN PLOT FUNCTION
-def violin_plot(metric, protein_name):
+def violin_plot_metrics(metric, protein_name):
     
     df_DKSC_METRICS = get_data(protein_name, 'df_DKSC_METRICS')
     W = df_DKSC_METRICS.filter(regex=metric)
     
-    y_axis_params = get_y_axis_params(metric)
+    y_axis_params = get_y_axis_params(metric, 'violin')
 
     fig = go.Figure()
 
@@ -105,15 +105,51 @@ def violin_plot(metric, protein_name):
         fig.add_trace(
             go.Violin(
                 y = W[column],
-                name = column.split()[0].upper(),
+                name = column.split('_')[0].upper(),
                 jitter = 1, points = 'all', side = 'positive',
                 box_visible = True,
                 # selectedpoints = selected_points,
                 marker = dict(
-                    size = 5
-                )
+                    size = 5,
+                    opacity=0.5
+                ),
+                opacity=0.7
             )
         )
+
+    # AXES
+    fig.update_xaxes(ticks='outside', showline=True, linewidth=2.7, title_font=dict(size=22),
+                       linecolor='#43494F', mirror = True)
+    # Y axis changes
+    fig.update_yaxes(y_axis_params)
+    fig.update_yaxes(ticks='outside', showline=True, title_font=dict(size=22),
+                     linewidth=2.5, linecolor='black', mirror = True)
+    fig.update_layout(
+        height=450,
+        template='plotly_white',
+        hoverlabel=dict(
+            bgcolor = 'white',
+            font_size=14
+        ),
+        xaxis = dict(
+            title='Molecular Data Sets'
+        ),
+        yaxis = dict(
+            title=f'Metric Score:<br><b>{metric_names[metric]}</b>'
+        ),
+        legend=dict(
+            font=dict(size=15),
+            orientation="h",
+            yanchor="bottom",
+            y=0.02,
+            xanchor="center",
+            x=0.5,
+            bgcolor="#F5F3EF"
+        ),
+        dragmode='pan',
+        margin=dict(l=30, r=30, t=5, b=30),
+        modebar=dict(orientation='v', activecolor='#1d89ff')
+    )
     
     return fig
 
@@ -148,7 +184,7 @@ def line_plot_metrics(split, selector, metric, protein_name):
     # Número de conformaciones
     n_confs = X_mean.shape[0]
 
-    y_axis_params = get_y_axis_params(metric)
+    y_axis_params = get_y_axis_params(metric, 'line')
 
     traces = []
     for col in X_mean.columns:
@@ -232,7 +268,7 @@ def line_plot_metrics(split, selector, metric, protein_name):
     fig.update_yaxes(ticks='outside', showline=True, title_font=dict(size=22),
                      linewidth=2.5, linecolor='black', mirror = True)
     fig.update_layout(
-        height=500,
+        height=450,
         template='plotly_white',
                       hoverlabel=dict(
                          bgcolor = 'white',
