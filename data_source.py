@@ -138,7 +138,7 @@ def get_y_axis_params(metric, plot_type = 'line'):
 # SCATTER PLOT
 scatter_colors = ['#2a7885', '#5a8b59', '#f64a3b', 'grey', '#fecc6a', '#69d7c4']
 
-def mds_plot(protein_name, dr_method, prot_section, point_size_by):
+def mds_plot(protein_name, dr_method, prot_section, point_size_by, preselected_confs):
     # Table of protein metadata
     df_PROT_METADATA = get_data(protein_name, 'df_PROT_METADATA')
     
@@ -177,8 +177,10 @@ def mds_plot(protein_name, dr_method, prot_section, point_size_by):
 
     fig = go.Figure()
 
+
     for label in labels:
         subset = X_mtd.query(f'{color_by} == "{label}"')
+        size = subset[point_size_by]
 
         formatted_text = [
             f'<b>Conf:</b> {idx}' + 
@@ -199,14 +201,41 @@ def mds_plot(protein_name, dr_method, prot_section, point_size_by):
                 mode='markers',
                 marker=dict(
                     color=subset['color_col'],
-                    size=subset[point_size_by],
+                    size=size,
                     sizemode='diameter',
-                    sizeref=subset[point_size_by].max()/15,
+                    sizeref=2.*max(size)/(5.**2),
+                    sizemin=1,
                     line_width=0
+                ),           
+                #selectedpoints = preselected_confs,
+                selected=dict(
+                    marker=dict(
+                        opacity=1
+                    )
                 ),
                 opacity=0.8,
                 hoverinfo='text',
                 hovertext=formatted_text
+            )
+        )
+    
+    if preselected_confs is not None:
+        selected = X_mtd.iloc[preselected_confs]
+        fig.add_trace(
+            go.Scatter(
+                x = selected.x,
+                y = selected.y,
+                name = 'Selected',
+                mode='markers',
+                hoverinfo='none',  
+                marker=dict(
+                    color='rgba(0, 0, 0, 0)',
+                    size=selected[point_size_by],
+                    sizemode='diameter',
+                    sizeref=selected[point_size_by].max()/15,
+                    line_width=2,
+                    line_color='black'
+                ),
             )
         )
 
@@ -233,10 +262,10 @@ def mds_plot(protein_name, dr_method, prot_section, point_size_by):
         legend=dict(
             font=dict(size=15),
             orientation="h",
-            yanchor="bottom",
-            y=-0.4,
-            xanchor="center",
-            x=0.5,
+            yanchor="top",
+            y=1,
+            xanchor="right",
+            x=1,
             bgcolor="#F5F3EF"
         ),
         dragmode='pan',
@@ -250,7 +279,7 @@ def mds_plot(protein_name, dr_method, prot_section, point_size_by):
 
 
 # VIOLIN PLOT FUNCTION
-def violin_plot_metrics(metric, protein_name, show_benchmarks):
+def violin_plot_metrics(metric, protein_name, show_benchmarks, preselected_confs):
     if 'bedroc' in metric or 'ef_0' in metric:
         metric_filter = metric.replace('_', '-')
     else:
@@ -273,12 +302,17 @@ def violin_plot_metrics(metric, protein_name, show_benchmarks):
                 name = column.split('_')[0].upper(),
                 jitter = 1, points = 'all', side = 'positive',
                 box_visible = True,
-                # selectedpoints = selected_points,
                 marker = dict(
                     size = 6,
-                    opacity=0.4
+                    opacity=0.3
                 ),
-                opacity=0.6,
+                selectedpoints = preselected_confs,
+                selected=dict(
+                    marker=dict(
+                        opacity=1
+                    )
+                ),
+                opacity=0.8,
                 hoverinfo='text',
                 hovertext=[f'{i}: {str(j)}' for i, j in zip(W.index, W[column])]
             )

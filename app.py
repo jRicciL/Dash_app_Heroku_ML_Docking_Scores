@@ -3,7 +3,7 @@ import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
 from data_source import *
@@ -176,17 +176,20 @@ line_plot = [
 
 # SLIDER
 max_value = 402
-slider_range = { i: str(i) for i in range(max_value) if i%10 == 0}
-n_confs_slider = html.Div([
-    dcc.Slider(
-        id='n-confs-slider',
-        min=1,
-        max=max_value,
-        step=1,
-        value=50,
-        marks=slider_range
-    )
-], className='ml-5 pl-2 pr-1')
+marks = { i: str(i) for i in range(max_value) if i%10 == 0}
+n_confs_slider = html.Div(
+    id='slider-div',
+    children=[
+        dcc.Slider(
+            id='n-confs-slider',
+            min=1,
+            max=max_value,
+            step=1,
+            value=50,
+            marks=marks
+        )   
+    ],
+    className='ml-5 pl-2 pr-1')
 
 scatter_plot = [
     html.H5(id='mds-title', className='text-center'),
@@ -245,6 +248,29 @@ app.layout = dbc.Container(
 )
 
 # Callbacks
+# Slider callback
+@app.callback(
+    [
+        Output(component_id='n-confs-slider', component_property='max'),
+        Output(component_id='n-confs-slider', component_property='marks'),
+    ],
+    [
+        Input("protein-value", "value"),
+    ],
+    [
+        State('n-confs-slider', 'max'),
+        State('n-confs-slider', 'marks'),
+    ]
+)
+def set_slider(protein_name, max, marks):
+    if protein_name == 'CDK2':
+        max_value = 402
+    elif protein_name == 'FXa':
+        max_value = 136 
+
+    marks = { i: str(i) for i in range(max_value) if i%10 == 0}
+
+    return max_value, marks
 
 # Title updater
 @app.callback(
@@ -326,9 +352,9 @@ def render_plot(split, selector, metric,
 
     line_plot = line_plot_metrics(split, selector, metric, protein_name, n_confs)
 
-    violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks)
+    violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks, preselected_confs)
 
-    scatter_plot = mds_plot(protein_name, dr_method, prot_section, point_size_by)
+    scatter_plot = mds_plot(protein_name, dr_method, prot_section, point_size_by, preselected_confs)
     return line_plot, violin_plot, scatter_plot
 
 if __name__ == '__main__':
