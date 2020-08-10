@@ -142,6 +142,16 @@ controls = dbc.Card(
                     value='sec',
                     labelCheckedStyle={"color": "#F5D5AB"}
                 ),
+                html.Br(),
+                dbc.Label("Point's size by:", className='font-weight-bold'),
+                dbc.RadioItems(
+                    id="point-size-by",
+                    options=[
+                        {'label': value, 'value': key} for key, value in point_size_by.items()
+                    ],
+                    value='Pocket Volume (Pkt)',
+                    labelCheckedStyle={"color": "#F5D5AB"}
+                ),
             ],
         ),
         
@@ -179,7 +189,7 @@ n_confs_slider = html.Div([
 ], className='ml-5 pl-2 pr-1')
 
 scatter_plot = [
-    html.H5('Dim Reduction', className='text-center'),
+    html.H5(id='mds-title', className='text-center'),
      dcc.Graph(
         id='scatter-plot',
         config=plotly_conf
@@ -240,19 +250,27 @@ app.layout = dbc.Container(
 @app.callback(
     [
         Output(component_id='plot-title', component_property='children'),
-        Output(component_id='violin-title', component_property='children')
+        Output(component_id='violin-title', component_property='children'),
+        Output(component_id='mds-title', component_property='children'),
     ],
     [
         Input("split-value", "value"),
         Input("selector-value", "value"),
         Input("metric-value", "value"),
-        Input("protein-value", "value")
+        Input("protein-value", "value"),
+        Input("dr-method-value", "value"),
+        Input("prot-section-value", "value"),
     ]
 )
-def render_title(split, selector, metric, protein_name):
+def render_title(split, selector, metric, protein_name, dr_method, protein_section):
     split_name = split_names[split]
     selector_name = selector_names[selector]
     metric_name = metric_names[metric]
+    if protein_section == 'vol_pkt':
+        dr_method = 'mds'
+    dr_method_name = dr_methods_names[dr_method]
+    prot_section = prot_section_dr[protein_section]
+
     #title = f"<span class='font-weight-light'>Metric</span> {metric_name} - {split_name} Splitting - {selector_name} Selection"
     line_title = html.P(children=[
         html.Span(f"{protein_name}: ", className='font-weight-bold h3'),
@@ -272,7 +290,13 @@ def render_title(split, selector, metric, protein_name):
         html.Span(' using ', className='font-weight-light'),
         html.Span('Docking Raw Scores', className='font-weight-light font-italic'),
     ])
-    return line_title, violin_title
+
+    mds_title = html.P(children=[
+        html.Span(f"{dr_method_name}", className='font-weight-bold'),
+        html.Span(f' over Protein Conformations '),
+        html.Span(f'({prot_section})', className='font-weight-light font-italic h6'),
+    ]) 
+    return line_title, violin_title, mds_title
 
 
 # Plot Renders
@@ -290,13 +314,16 @@ def render_title(split, selector, metric, protein_name):
         Input("show-benchmarks", "value"),
         Input("dr-method-value", "value"),
         Input("prot-section-value", "value"),
+        Input("point-size-by", "value"),
     ]
 )
 def render_plot(split, selector, metric, 
-    protein_name, show_benchmarks, dr_method, prot_section):
+    protein_name, show_benchmarks, dr_method, prot_section, point_size_by):
     line_plot = line_plot_metrics(split, selector, metric, protein_name)
+
     violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks)
-    scatter_plot = mds_plot(protein_name, dr_method, prot_section)
+
+    scatter_plot = mds_plot(protein_name, dr_method, prot_section, point_size_by)
     return line_plot, violin_plot, scatter_plot
 
 if __name__ == '__main__':

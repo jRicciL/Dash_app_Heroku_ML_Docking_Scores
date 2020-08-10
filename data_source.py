@@ -90,6 +90,12 @@ prot_section_dr = {
     'vol_pkt': 'Pocket Shape (POVME) (cMDS)'
 }
 
+point_size_by = {
+    'LigMass': 'Ligand MW',
+    'Pocket Volume (Pkt)': 'Pocket Volume (A)',
+    #'None': 'None'
+}
+
 
 
 def get_y_axis_params(metric, plot_type = 'line'):
@@ -107,7 +113,7 @@ def get_y_axis_params(metric, plot_type = 'line'):
 # SCATTER PLOT
 scatter_colors = ['#2a7885', '#5a8b59', '#f64a3b', 'grey', '#fecc6a', '#69d7c4']
 
-def mds_plot(protein_name, dr_method, prot_section):
+def mds_plot(protein_name, dr_method, prot_section, point_size_by):
     # Table of protein metadata
     df_PROT_METADATA = get_data(protein_name, 'df_PROT_METADATA')
     
@@ -127,7 +133,7 @@ def mds_plot(protein_name, dr_method, prot_section):
     X_mtd = pd.concat([df_PROT_METADATA.set_index('PDB-id'),
                 Z], axis=1)
     X_mtd.reset_index(inplace=True)
-    X_mtd.LigMass = pd.to_numeric(X_mtd.LigMass)
+    X_mtd.LigMass = pd.to_numeric(X_mtd.LigMass).fillna(0)
 
     color_by='Conformation'
     labels_col = X_mtd[color_by]
@@ -149,9 +155,16 @@ def mds_plot(protein_name, dr_method, prot_section):
     for label in labels:
         subset = X_mtd.query(f'{color_by} == "{label}"')
 
-        # formatted_text = [f'' 
-        #     for idx, lig, lig_mass, vol in
-        #     zip(subset[['']])]
+        formatted_text = [
+            f'<b>Conf:</b> {idx}' + 
+            f'<br><b>Ligand:</b> {lig}'+
+            f'<br><b>Ligand MW:</b> {lig_mass} '  +
+            f'<br><b>Pkt volume:</b> {pkt_vol} A<sup>3</sup>'  
+            for idx, lig, lig_mass, pkt_vol in  
+            zip(subset['PDB-id'], 
+                subset.Ligand, 
+                subset.LigMass,
+                subset['Pocket Volume (Pkt)'])]
         fig.add_trace(
             go.Scatter(
                 x = subset.x,
@@ -161,14 +174,14 @@ def mds_plot(protein_name, dr_method, prot_section):
                 mode='markers',
                 marker=dict(
                     color=subset['color_col'],
-                    size=subset['Pocket Volume (Pkt)'],
+                    size=subset[point_size_by],
                     sizemode='diameter',
-                    sizeref=70,
+                    sizeref=subset[point_size_by].max()/15,
                     line_width=0
                 ),
                 opacity=0.8,
                 hoverinfo='text',
-                # hovertext=formatted_text
+                hovertext=formatted_text
             )
         )
 
@@ -237,7 +250,7 @@ def violin_plot_metrics(metric, protein_name, show_benchmarks):
                 box_visible = True,
                 # selectedpoints = selected_points,
                 marker = dict(
-                    size = 5,
+                    size = 6,
                     opacity=0.4
                 ),
                 opacity=0.6,
