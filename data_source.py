@@ -142,10 +142,10 @@ def render_mtd_table(protein_name, preselected_confs):
     df_PROT_METADATA = get_data(protein_name, 'df_PROT_METADATA')
 
     #df_PROT_METADATA.loc[:,'PDB-id'] = df_PROT_METADATA['PDB-id'].apply(lambda x: html.A(href=f'https://www.rcsb.org/structure/{x}', children=x, target='_blank'))
-    df_PROT_METADATA.loc[:,'Resolution'] = df_PROT_METADATA['Resolution'].apply(lambda x: round(x, 2))
-    df_PROT_METADATA.loc[:,'Coverage'] = df_PROT_METADATA['Coverage'].apply(lambda x: round(x, 2))
-    df_PROT_METADATA.loc[:,'Date'] = df_PROT_METADATA['Date'].dt.strftime('%m/%d/%Y')
-    df_PROT_METADATA = df_PROT_METADATA.drop(['Pocket Volume (Sec)'], axis=1)
+    # df_PROT_METADATA.loc[:,'Resolution'] = df_PROT_METADATA['Resolution'].apply(lambda x: round(x, 2))
+    # df_PROT_METADATA.loc[:,'Coverage'] = df_PROT_METADATA['Coverage'].apply(lambda x: round(x, 2))
+    # df_PROT_METADATA.loc[:,'Date'] = df_PROT_METADATA['Date'].dt.strftime('%m/%d/%Y')
+    # df_PROT_METADATA = df_PROT_METADATA.drop(['Pocket Volume (Sec)'], axis=1)
 
     df_PROT_METADATA.colums = [
         'PDB id', 'Pub. Date', 'Resolution', 'Coverage',
