@@ -28,7 +28,8 @@ SIDEBAR_STYLE = {
 # add some padding.
 CONTENT_STYLE = {
     "margin-left": "0",
-    "margin-right": "1rem"
+    "margin-right": "1rem",
+    "margin-top": "1rem"
 }
 
 FOOTER_STYLE = {
@@ -42,12 +43,13 @@ FOOTER_STYLE = {
 
 controls = dbc.Card(
     [
-        html.H4('Input values:', style={'color': '#FAB06E'}),
+        html.H4('ML&CS Dksc Results:', style={'color': '#FAB06E'}),
         html.Hr(style={'background-color': '#888888'}),
 #        dbc.ButtonGroup(
 #            [dbc.Button("CDK2"),
 #             dbc.Button("FXa")]
 #        ),
+
         dbc.FormGroup(
             [
                 dbc.Label("Select a protein:", className='font-weight-bold'),
@@ -59,6 +61,22 @@ controls = dbc.Card(
                     ],
                     value='CDK2',
                     labelCheckedStyle={"color": "#FF9191"},
+                    inline=True
+                ),
+            ],
+        ),
+        dbc.FormGroup(
+            [
+                dbc.Label("Evaluation Method:", className='font-weight-bold'),
+                dcc.Dropdown(
+                    id="nl-or-cs",
+                    options=[
+                        {'label': 'Machine Learning', 'value': 'ml'},
+                        {'label': 'Consensus Scoring', 'value': 'cs'}
+                    ],
+                    value='ml',
+                    style = {"color": "#222222"}
+                    #labelCheckedStyle={"color": "#FF9191"},
                 ),
             ],
         ),
@@ -73,10 +91,11 @@ controls = dbc.Card(
                     ],
                     value='rand',
                     labelCheckedStyle={"color": "#FF9191"},
+                    inline=True
                 ),
             ],
         ),
-        html.Hr(style={'background-color': '#666666'}),
+        # html.Hr(style={'background-color': '#666666'}),
         dbc.FormGroup(
             [
                 dbc.Label("Conformational Selection method:", className='font-weight-bold'),
@@ -90,7 +109,7 @@ controls = dbc.Card(
                 ),
             ],
         ),
-        html.Hr(style={'background-color': '#666666'}),
+        #html.Hr(style={'background-color': '#666666'}),
         dbc.FormGroup(
             [
                 dbc.Label("Evaluation Metric:", className='font-weight-bold'),
@@ -225,16 +244,16 @@ plot_section = [
 #***********
 app.layout = dbc.Container(
     [
-        html.Hr(),
-        html.H1("CDK2 & FXa Results"),
-        html.Hr(),
+        # html.Hr(),
+        # html.H1("CDK2 & FXa Results"),
+        # html.Hr(),
         html.Br(),
         dbc.Row(
             [
                 dbc.Col(controls, md=3, className='mb-5'),
                 dbc.Col(plot_section, md=9),
             ],
-            align="center",
+            align="top",
             style=CONTENT_STYLE
         ),
         dbc.Row(
@@ -247,7 +266,7 @@ app.layout = dbc.Container(
                 dbc.Col(id='div-mtd-table',
                     md=12, className='mb-5 p-3'),
             ],
-            align="center",
+            align="top",
             style=CONTENT_STYLE
         ),
         html.Footer([

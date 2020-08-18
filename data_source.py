@@ -410,7 +410,6 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
     #X_dksc, X = get_data(protein_name)
 
     dict_ML_RESULTS = get_data(protein_name, 'dict_ML_RESULTS')
-    X_dksc = dict_ML_RESULTS['X_dksc']
     X = dict_ML_RESULTS['X_ml']
 
     # Mols info
@@ -419,6 +418,7 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
     n_actives = libs['num_actives']
 
     # Ref score
+    X_dksc = dict_ML_RESULTS['X_dksc']
     best_ref = X_dksc.query(query).max()['best_dksc']
     median_ref = X_dksc.query(query).median()['median_dksc']
 
@@ -523,7 +523,7 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
     fig.update_yaxes(ticks='outside', showline=True, title_font=dict(size=22),
                      linewidth=2.5, linecolor='black', mirror = True)
     fig.update_layout(
-        height=450,
+        height=500,
         template='plotly_white',
                       hoverlabel=dict(
                          bgcolor = 'white',
