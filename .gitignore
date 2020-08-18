@@ -6,3 +6,6 @@ dash_app_ml1
 __pycache__
 
 wscode.code-workspace
+data
+Integrate and preprocess data.ipynb
+.ipynb_checkpoints

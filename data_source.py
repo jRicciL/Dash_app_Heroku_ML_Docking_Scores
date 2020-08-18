@@ -6,15 +6,15 @@ import dash_table
 import dash_html_components as html
 
 # Read the pickle file
-data_file_fxa = './FXA_dash_app_results.obj'
-with open(data_file_fxa, 'rb') as f:
-    FXA_DATA = pickle.load(f)
+app_data = './dash_app_data.pkl'
+with open(app_data, 'rb') as f:
+    APP_DATA = pickle.load(f)
 
-data_file_cdk2 = './CDK2_dash_app_results.obj'
-with open(data_file_cdk2, 'rb') as f:
-    CDK2_DATA = pickle.load(f)
+# Assing protein data
+FXA_DATA = APP_DATA['FXA']
+CDK2_DATA = APP_DATA['CDK2']
 
-# Assing values
+# Assing values: ML Data
 ALL_RESULTS_FXa = FXA_DATA['dict_ML_RESULTS']
 ALL_RESULTS_CDK2 = CDK2_DATA['dict_ML_RESULTS']
 
@@ -82,18 +82,18 @@ metric_names = {'roc_auc'   : 'ROC-AUC',
                }
 
 dr_methods_names = {
-    'mds': 'cMDS',
+    'mds' : 'cMDS',
     'tsne': 't-SNE'
 }
 
 prot_section_dr = {
-    'sec': 'Secondary Structure (Ca)',
-    'pkt': 'Pocket Residues (Ca)',
+    'sec'    : 'Secondary Structure (Ca)',
+    'pkt'    : 'Pocket Residues (Ca)',
     'vol_pkt': 'Pocket Shape (POVME) (cMDS)'
 }
 
 point_size_by = {
-    'LigMass': 'Ligand MW',
+    'LigMass'            : 'Ligand MW',
     'Pocket Volume (Pkt)': 'Pocket Volume (A)',
     #'None': 'None'
 }
@@ -120,7 +120,6 @@ def get_preselected_confs(split, selector, n_confs, protein_name):
             ]
 
         selected_confs = selected_confs[:n_confs]
-        
     
     return selected_confs
 
@@ -324,8 +323,6 @@ def mds_plot(protein_name, dr_method, prot_section, point_size_by, preselected_c
 
     return fig
 
-     
-
 
 # VIOLIN PLOT FUNCTION
 def violin_plot_metrics(metric, protein_name, show_benchmarks, preselected_confs):
@@ -515,8 +512,8 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
     fig.add_annotation(xref='paper', yref='paper', x=0.01, y=0.98,
             xanchor='left', yanchor='top', showarrow=False,
             align="left",
-            text=f'<b>Total mols:</b> {n_actives}/{n_mols}; Ra = {round(n_actives/n_mols, 2)}' +
-            f'<br><b>Test set:</b> {int(n_actives/4)}/{int(n_mols/4)}; Ra = {round(n_actives/n_mols, 2)}'
+            text=f'<b>Total mols:</b><br> {n_actives} <b>/</b> {n_mols}; Ra = {round(n_actives/n_mols, 2)}' +
+            f'<br><b>Test set:</b><br> {int(n_actives/4)} <b>/</b> {int(n_mols/4)}; Ra = {round(n_actives/n_mols, 2)}'
     )
     # AXES
     fig.update_xaxes(ticks='outside', showline=True, linewidth=2.7, title_font=dict(size=22),

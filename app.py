@@ -190,7 +190,7 @@ n_confs_slider = html.Div(
             marks=marks
         )   
     ],
-    className='ml-5 pl-2 pr-1')
+    className='ml-5 pl-3 pr-1')
 
 scatter_plot = [
     html.H5(id='mds-title', className='text-center'),
