@@ -43,7 +43,7 @@ FOOTER_STYLE = {
 
 controls = dbc.Card(
     [
-        html.H4('ML&CS Dksc Results:', style={'color': '#FAB06E'}),
+        html.H3('ML&CS Dksc Results:', style={'color': '#FAB06E'}),
         html.Hr(style={'background-color': '#888888'}),
 #        dbc.ButtonGroup(
 #            [dbc.Button("CDK2"),
@@ -69,7 +69,7 @@ controls = dbc.Card(
             [
                 dbc.Label("Evaluation Method:", className='font-weight-bold'),
                 dcc.Dropdown(
-                    id="nl-or-cs",
+                    id="ml-or-cs",
                     options=[
                         {'label': 'Machine Learning', 'value': 'ml'},
                         {'label': 'Consensus Scoring', 'value': 'cs'}
@@ -196,7 +196,7 @@ line_plot = [
 
 # SLIDER
 max_value = 402
-marks = { i: str(i) for i in range(max_value) if i%10 == 0}
+marks = { i: {'label': str(i), 'style': {'transform': 'rotate(45deg)'}} for i in range(max_value) if i%10 == 0}
 n_confs_slider = html.Div(
     id='slider-div',
     children=[
@@ -209,7 +209,7 @@ n_confs_slider = html.Div(
             marks=marks
         )   
     ],
-    className='ml-5 pl-3 pr-1')
+    className='ml-5 pl-3 pr-2')
 
 scatter_plot = [
     html.H5(id='mds-title', className='text-center'),
@@ -232,8 +232,8 @@ plot_section = [
     dbc.Row([
         dbc.Col(line_plot, md=12, className='mb-2'),
         dbc.Col(n_confs_slider, md=12, className='mb-5'),
-        dbc.Col(violin_plot, md=7),
-        dbc.Col(scatter_plot, md=5),
+        dbc.Col(violin_plot, lg=7, md=12),
+        dbc.Col(scatter_plot, lg=5, md=12),
        ],
     className='mb-5'
     )
@@ -250,8 +250,8 @@ app.layout = dbc.Container(
         html.Br(),
         dbc.Row(
             [
-                dbc.Col(controls, md=3, className='mb-5'),
-                dbc.Col(plot_section, md=9),
+                dbc.Col(controls, sm=4, md=4, lg=3, className='mb-5'),
+                dbc.Col(plot_section, sm=8, md=8, lg=9),
             ],
             align="top",
             style=CONTENT_STYLE
@@ -323,9 +323,11 @@ def set_slider(protein_name, max, marks):
         Input("protein-value", "value"),
         Input("dr-method-value", "value"),
         Input("prot-section-value", "value"),
+        Input("ml-or-cs", "value"),
     ]
 )
-def render_title(split, selector, metric, protein_name, dr_method, protein_section):
+def render_title(split, selector, metric, protein_name, dr_method, protein_section, ml_or_cs):
+    methodology_name = methodologies_dic[ml_or_cs]
     split_name = split_names[split]
     selector_name = selector_names[selector]
     metric_name = metric_names[metric]
@@ -336,7 +338,8 @@ def render_title(split, selector, metric, protein_name, dr_method, protein_secti
 
     #title = f"<span class='font-weight-light'>Metric</span> {metric_name} - {split_name} Splitting - {selector_name} Selection"
     line_title = html.P(children=[
-        html.Span(f"{protein_name}: ", className='font-weight-bold h3'),
+        html.Span(f"{protein_name} - ", className='font-weight-bold h3'),
+        html.Span(methodology_name + ': ', className='font-weight-light h3'),
         html.Span('Metric ', className='font-weight-light font-italic'),
         html.Span(metric_name),
         html.Span(' - '),
@@ -380,15 +383,16 @@ def render_title(split, selector, metric, protein_name, dr_method, protein_secti
         Input("prot-section-value", "value"),
         Input("point-size-by", "value"),
         Input("n-confs-slider", "value"),
+        Input("ml-or-cs", "value"),
     ]
 )
 def render_plot(split, selector, metric, 
     protein_name, show_benchmarks, dr_method, 
-    prot_section, point_size_by, n_confs):
+    prot_section, point_size_by, n_confs, methodology):
 
     preselected_confs = get_preselected_confs(split, selector, n_confs, protein_name)
 
-    line_plot = line_plot_metrics(split, selector, metric, protein_name, n_confs)
+    line_plot = line_plot_metrics(split, selector, metric, protein_name, n_confs, methodology)
 
     violin_plot = violin_plot_metrics(metric, protein_name, show_benchmarks, preselected_confs)
 

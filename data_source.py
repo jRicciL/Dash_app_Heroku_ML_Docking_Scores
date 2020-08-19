@@ -47,16 +47,31 @@ plotly_conf = dict(
 cols_lines = {'LogReg'  : 'rgb(134, 102, 183)',
               'rbfSVC'  : 'rgb(229, 156, 48)',
               'XGB_tree': 'rgb(9, 153, 149)',
-              '1NN'     : 'rgb(230, 73, 79)'}
+              '1NN'     : 'rgb(230, 73, 79)',
+              'RbR'   : 'rgb(134, 102, 183)',
+             'RbN'   : 'rgb(216, 143, 48)',
+             'BS' : 'rgb(9, 153, 149)',
+             'ECR'      : 'rgb(230, 73, 79)'
+              }
 
 cols_fill = {'LogReg'   : 'rgba(134, 102, 183, 0.25)',
              'rbfSVC'   : 'rgba(216, 143, 48, 0.25)',
              'XGB_tree' : 'rgba(9, 153, 149, 0.25)',
-             '1NN'      : 'rgba(230, 73, 79, 0.25)'}
+             '1NN'      : 'rgba(230, 73, 79, 0.25)',
+             'RbR'   : 'rgba(134, 102, 183, 0.25)',
+             'RbN'   : 'rgba(216, 143, 48, 0.25)',
+             'BS' : 'rgba(9, 153, 149, 0.25)',
+             'ECR'      : 'rgba(230, 73, 79, 0.25)'
+             }
 
 # Dictionary names
 split_names = {'rand': 'Random',
                'scff': 'Scaffold'}
+
+methodologies_dic = {
+    'ml': 'Machine Learning',
+    'cs': 'Consensus Scoring'
+}
 
 selector_names = {'rand' : 'Random',
                   'LR'   : 'RFE (Log. Reg.)',
@@ -67,6 +82,13 @@ clf_names_dict = {'LogReg'  : 'Log. Regression',
                   'rbfSVC'  : 'RBF SVM',
                   'XGB_tree': 'Gradient Boosting',
                   '1NN'     : '1-NN Classifier'}
+
+cs_names_dict = {
+    'BS': 'BS',
+    'RbN': 'RbN',
+    'RbR': 'RbR',
+    'ECR': 'ECR'
+}
 
 metric_names = {'roc_auc'   : 'ROC-AUC',
                 'nef_auc'   : 'NEF-AUC',
@@ -404,13 +426,26 @@ def violin_plot_metrics(metric, protein_name, show_benchmarks, preselected_confs
 
 
 # LINE PLOT FUNCTION
-def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
+def line_plot_metrics(split, 
+                      selector, 
+                      metric, 
+                      protein_name, 
+                      n_confs_sel,
+                      methodology
+                      ):
+
     query = f"split == '{split}' & selector == '{selector}' & metric == '{metric}'"
 
-    #X_dksc, X = get_data(protein_name)
-
     dict_ML_RESULTS = get_data(protein_name, 'dict_ML_RESULTS')
-    X = dict_ML_RESULTS['X_ml']
+    X = None
+    if methodology == 'ml':
+        X = dict_ML_RESULTS['X_ml']
+        classifier = 'classifier'
+        clf_names = clf_names_dict
+    elif methodology == 'cs':
+        X = get_data(protein_name, 'df_CS_RESULTS')
+        classifier = 'consensus'
+        clf_names = cs_names_dict
 
     # Mols info
     libs = mos_info[protein_name]
@@ -425,7 +460,7 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
     # Results
     X_subset = X.query(query)
     X_subset = X_subset.reset_index().drop(['split', 'selector',  'metric', 0], axis=1)
-    X_subset = X_subset.set_index(['desc', 'classifier']).T
+    X_subset = X_subset.set_index(['desc', classifier]).T
     X_mean = X_subset.loc[:, 'mean']
     X_std = X_subset.loc[:, 'std']
 
@@ -443,8 +478,8 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
         upper = go.Scatter(x=X_mean.index, 
                            y=X_mean[col] + X_std[col],
                            mode='lines',
-                           name=clf_names_dict[col], 
-                           legendgroup=clf_names_dict[col], 
+                           name=clf_names[col], 
+                           legendgroup=clf_names[col], 
                            showlegend=False,
                            line=dict(width=0),
                            fillcolor=cols_fill[col],
@@ -454,16 +489,16 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
         line = go.Scatter(x=X_mean.index, 
                            y=X_mean[col],
                            mode='lines',
-                           name=clf_names_dict[col],
+                           name=clf_names[col],
                            hovertemplate = 
-                           f'<b style="color: {cols_lines[col]}">{clf_names_dict[col]}</b>' +
+                           f'<b style="color: {cols_lines[col]}">{clf_names[col]}</b>' +
                            '<br>' +
                            '<b><i>k</i> confs:</b> %{x}' +
                            '<br>' +
                            f'<b><i>{metric_names[metric]}</i>:</b> ' + 
                            '%{y:.2f}' +
                            '<extra></extra>',
-                           legendgroup=clf_names_dict[col], 
+                           legendgroup=clf_names[col], 
                            line=dict(width=2.5,
                                      color=cols_lines[col]),
                            fillcolor=cols_fill[col],
@@ -472,8 +507,8 @@ def line_plot_metrics(split, selector, metric, protein_name, n_confs_sel):
         lower = go.Scatter(x=X_mean.index, 
                            y=X_mean[col] - X_std[col],
                            mode='lines',
-                           name=clf_names_dict[col], 
-                           legendgroup=clf_names_dict[col], 
+                           name=clf_names[col], 
+                           legendgroup=clf_names[col], 
                            showlegend=False,
                            hoverinfo='skip',
                            line=dict(width=0),
