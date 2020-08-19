@@ -45,10 +45,6 @@ controls = dbc.Card(
     [
         html.H3('ML&CS Dksc Results:', style={'color': '#FAB06E'}),
         html.Hr(style={'background-color': '#888888'}),
-#        dbc.ButtonGroup(
-#            [dbc.Button("CDK2"),
-#             dbc.Button("FXa")]
-#        ),
 
         dbc.FormGroup(
             [
@@ -60,7 +56,7 @@ controls = dbc.Card(
                         {'label': 'FXa', 'value': 'FXa'}
                     ],
                     value='CDK2',
-                    labelCheckedStyle={"color": "#FF9191"},
+                    labelCheckedStyle={"color": "#98DED6", 'font-weight': 'bold'},
                     inline=True
                 ),
             ],
@@ -75,7 +71,7 @@ controls = dbc.Card(
                         {'label': 'Consensus Scoring', 'value': 'cs'}
                     ],
                     value='ml',
-                    style = {"color": "#222222"}
+                    style = {"color": "#222222", 'font-weight': 'bold'}
                     #labelCheckedStyle={"color": "#FF9191"},
                 ),
             ],
@@ -90,7 +86,7 @@ controls = dbc.Card(
                         {'label': value, 'value': key} for key, value in split_names.items()
                     ],
                     value='rand',
-                    labelCheckedStyle={"color": "#FF9191"},
+                    labelCheckedStyle={"color": "#FF9191", 'font-weight': 'bold'},
                     inline=True
                 ),
             ],
@@ -105,7 +101,7 @@ controls = dbc.Card(
                         {'label': value, 'value': key} for key, value in selector_names.items()
                     ],
                     value='rand',
-                    labelCheckedStyle={"color": "#FF9191"},
+                    labelCheckedStyle={"color": "#FF9191", 'font-weight': 'bold'},
                 ),
             ],
         ),
@@ -119,7 +115,7 @@ controls = dbc.Card(
                         {'label': value, 'value': key} for key, value in metric_names.items()
                     ],
                     value="roc_auc",
-                    style = {"color": "#222222"}
+                    style = {"color": "#222222", 'font-weight': 'bold'}
                 ),
             ]
         ),
@@ -149,7 +145,7 @@ controls = dbc.Card(
                         {'label': value, 'value': key} for key, value in dr_methods_names.items()
                     ],
                     value='mds',
-                    labelCheckedStyle={"color": "#F5D5AB"},
+                    labelCheckedStyle={"color": "#F5D5AB", 'font-weight': 'bold'},
                     inline=True
                 ),
                 html.Br(),
@@ -244,9 +240,6 @@ plot_section = [
 #***********
 app.layout = dbc.Container(
     [
-        # html.Hr(),
-        # html.H1("CDK2 & FXa Results"),
-        # html.Hr(),
         html.Br(),
         dbc.Row(
             [
