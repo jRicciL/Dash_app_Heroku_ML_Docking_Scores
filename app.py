@@ -31,7 +31,12 @@ CONTENT_STYLE = {
     "margin-right": "1rem",
     "margin-top": "1rem"
 }
-
+TABLE_STYLE = {
+    "margin-left": "0",
+    "margin-right": "1rem",
+    "margin-top": "1rem",
+    "display": "none"
+}
 FOOTER_STYLE = {
     "position": "fixed",
     "bottom": "0",
@@ -260,7 +265,7 @@ app.layout = dbc.Container(
                     md=12, className='mb-5 p-3'),
             ],
             align="top",
-            style=CONTENT_STYLE
+            style=TABLE_STYLE
         ),
         html.Footer([
             html.A('@Ricci-López',
@@ -274,9 +279,6 @@ app.layout = dbc.Container(
 )
 
 # Callbacks
-
-
-
 
 # Slider callback
 @app.callback(
@@ -344,7 +346,7 @@ def render_title(split, selector, metric, protein_name, dr_method, protein_secti
     ])
 
     violin_title = html.P(children=[
-        html.Span(f"Violin plot: ", className='font-weight-bold'),
+        html.Span(f"Violin plot - ", className='font-weight-bold'),
         html.Span(f'{metric_name} score'),
         html.Span(' using ', className='font-weight-light'),
         html.Span('Docking Raw Scores', className='font-weight-light font-italic'),
