@@ -48,9 +48,14 @@ cols_lines = {'LogReg'  : 'rgb(134, 102, 183)',
               'rbfSVC'  : 'rgb(229, 156, 48)',
               'XGB_tree': 'rgb(9, 153, 149)',
               '1NN'     : 'rgb(230, 73, 79)',
-              'RbN'     : 'rgb(60, 139, 190)',
-              'RbR'     : 'rgb(245, 145, 40)',
-              'BS'      : 'rgb(165, 200, 135)',
+              
+              'MEAN'    : 'rgb(60, 139, 190)',
+              'MED'     : 'rgb(245, 145, 40)',
+              'RANK'    : 'rgb(165, 200, 135)',
+              'MIN'     : 'rgb(65, 0, 135)',
+              'MAX'     : 'rgb(165, 50, 235)',
+              'EUN'     : 'rgb(165, 100, 35)',
+              'VOTE'    : 'rgb(165, 150, 135)',
               'ECR'     : 'rgb(191, 50, 135)'
               }
 
@@ -58,9 +63,14 @@ cols_fill = {'LogReg'   : 'rgba(134, 102, 183, 0.25)',
              'rbfSVC'   : 'rgba(216, 143, 48, 0.25)',
              'XGB_tree' : 'rgba(9, 153, 149, 0.25)',
              '1NN'      : 'rgba(230, 73, 79, 0.25)',
-             'RbN'      : 'rgba(60, 139, 190, 0.2)',
-             'RbR'      : 'rgba(218, 120, 20, 0.25)',
-             'BS'       : 'rgba(155, 190, 125, 0.35)',
+
+             'MEAN'     : 'rgba(60, 139, 190, 0.2)',
+             'MED'      : 'rgba(218, 120, 20, 0.25)',
+             'RANK'     : 'rgba(155, 190, 125, 0.35)',
+             'MIN'      : 'rgba(65, 0, 135, 0.35)',
+             'MAX'      : 'rgba(165, 50, 235, 0.35)',
+             'EUN'      : 'rgba(165, 100, 35, 0.35)',
+             'VOTE'     : 'rgba(165, 150, 135, 0.35)',
              'ECR'      : 'rgba(191, 50, 135, 0.2)'
              }
 
@@ -83,24 +93,20 @@ clf_names_dict = {'LogReg'  : 'Log. Regression',
                   'XGB_tree': 'Gradient Boosting',
                   '1NN'     : '1-NN Classifier'}
 
-cs_names_dict = {
-    'BS': 'BS',
-    'RbN': 'RbN',
-    'RbR': 'RbR',
-    'ECR': 'ECR'
-}
+cs_names_dict = dict(zip(['MEAN', 'MED', 'RANK', 'MIN', 'MAX', 'EUN', 'VOTE', 'ECR'], 
+                         ['MEAN', 'MED', 'RANK', 'MIN', 'MAX', 'EUN', 'VOTE', 'ECR']))
 
 metric_names = {'roc_auc'   : 'ROC-AUC',
-                'nef_auc'   : 'NEF-AUC',
+                # 'nef_auc'   : 'NEF-AUC',
                 'pr_auc'    : 'Pr & Rcll-AUC',
                 'bedroc_20' : 'BEDROC (a=20)',
-                'bedroc_10' : 'BEDROC (a=10)',
-                'bedroc_2'  : 'BEDROC (a=2)',
+                # 'bedroc_10' : 'BEDROC (a=10)',
+                # 'bedroc_2'  : 'BEDROC (a=2)',
                 'bedroc_0.5': 'BEDROC (a=0.5)',
-                'ef_0.2'    : 'EF (chi=20.0%)',
-                'ef_0.02'   : 'EF (chi=2.0%)',
-                'ef_0.005'  : 'EF (chi=0.5%)',
-                'ef_0.001'  : 'EF (chi=0.1%)',
+                'ef_0.2'    : 'NEF (chi=20.0%)',
+                'ef_0.02'   : 'NEF (chi=2.0%)',
+                # 'ef_0.005'  : 'EF (chi=0.5%)',
+                # 'ef_0.001'  : 'EF (chi=0.1%)',
                }
 
 dr_methods_names = {
