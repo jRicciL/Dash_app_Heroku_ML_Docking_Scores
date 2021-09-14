@@ -9,3 +9,4 @@ wscode.code-workspace
 data
 Integrate and preprocess data.ipynb
 .ipynb_checkpoints
+._app.py
